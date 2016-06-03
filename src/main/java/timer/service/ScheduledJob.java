@@ -4,10 +4,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -44,8 +44,9 @@ public class ScheduledJob implements Job {
         		logger.error("找不到回调地址,group={},name={}",jobKey.getGroup(),jobKey.getName());
         	}
         	HttpPost httpPost = new HttpPost(dataMap.getString("callback_address"));
-        	if (!StringUtils.isEmpty(dataMap.getString("callback_content"))) {
-        		HttpEntity entity = new StringEntity(dataMap.getString("callback_content"), Consts.UTF_8);
+        	String callbackContent = dataMap.getString("callback_content");
+        	if (!StringUtils.isEmpty(callbackContent)) {
+        		HttpEntity entity = new StringEntity(callbackContent, ContentType.APPLICATION_JSON);
         		httpPost.setEntity(entity);
         	}
 			CloseableHttpResponse response = httpClient.execute(httpPost);
