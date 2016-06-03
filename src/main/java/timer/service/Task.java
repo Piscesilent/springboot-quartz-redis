@@ -8,6 +8,7 @@ import java.io.Serializable;
  *
  */
 public class Task implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -23,7 +24,12 @@ public class Task implements Serializable {
 	/**
 	 * 回调地址
 	 */
-	private String app_address;
+	private String callback_address;
+	
+	/**
+	 * 回调内容
+	 */
+	private String callback_content;
 
 
 	public String getJob_name() {
@@ -43,21 +49,29 @@ public class Task implements Serializable {
 		this.cron_expression = cron_expression;
 	}
 
-	public String getApp_address() {
-		return app_address;
+	public String getCallback_address() {
+		return callback_address;
 	}
 
-	public void setApp_address(String app_address) {
-		this.app_address = app_address;
+	public void setCallback_address(String callback_address) {
+		this.callback_address = callback_address;
+	}
+	
+	public String getCallback_content() {
+		return callback_content;
+	}
+
+	public void setCallback_content(String callback_content) {
+		this.callback_content = callback_content;
 	}
 
 	public Task() {
 	}
 
-	public Task(String job_name,String cron_expression, String app_address) {
+	public Task(String job_name,String cron_expression, String callback_address) {
 		this.job_name = job_name;
 		this.cron_expression = cron_expression;
-		this.app_address = app_address;
+		this.callback_address = callback_address;
 	}
 
 }

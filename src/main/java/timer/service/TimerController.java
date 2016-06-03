@@ -60,7 +60,7 @@ public class TimerController {
 		try {
 			if (StringUtils.isEmpty(task.getJob_name())
 					||StringUtils.isEmpty(task.getCron_expression())
-					||StringUtils.isEmpty(task.getApp_address())) {
+					||StringUtils.isEmpty(task.getCallback_address())) {
 				return NewResp.fail("参数缺失");
 			}
 			quartzManager.AddJob(scheduler, task);

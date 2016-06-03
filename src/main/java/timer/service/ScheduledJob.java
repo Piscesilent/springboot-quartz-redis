@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.quartz.Job;
@@ -38,10 +40,14 @@ public class ScheduledJob implements Job {
         JobDataMap dataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-        	if (CollectionUtils.isEmpty(dataMap) || StringUtils.isEmpty(dataMap.getString("app_address"))) {
+        	if (CollectionUtils.isEmpty(dataMap) || StringUtils.isEmpty(dataMap.getString("callback_address"))) {
         		logger.error("找不到回调地址,group={},name={}",jobKey.getGroup(),jobKey.getName());
         	}
-        	HttpPost httpPost = new HttpPost(dataMap.getString("app_address"));
+        	HttpPost httpPost = new HttpPost(dataMap.getString("callback_address"));
+        	if (!StringUtils.isEmpty(dataMap.getString("callback_content"))) {
+        		HttpEntity entity = new StringEntity(dataMap.getString("callback_content"), Consts.UTF_8);
+        		httpPost.setEntity(entity);
+        	}
 			CloseableHttpResponse response = httpClient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
 			String json = "";
@@ -56,10 +62,10 @@ public class ScheduledJob implements Job {
 				}
 				json = GsonUtils.getInstance().toJson(sb.toString());
 			}
-			logger.info("调用成功,url={},entity={},group={},name={}",dataMap.getString("app_address"),json,jobKey.getGroup(),jobKey.getName());
+			logger.info("调用成功,url={},entity={},group={},name={}",dataMap.getString("callback_address"),json,jobKey.getGroup(),jobKey.getName());
 		} catch (Exception e) {
 			logger.error("Http请求失败,url={},group={},name={}",
-					dataMap.getString("app_address"),jobKey.getGroup(),jobKey.getName(),e);
+					dataMap.getString("callback_address"),jobKey.getGroup(),jobKey.getName(),e);
 		}
     }
 }

@@ -147,7 +147,9 @@ public class QuartzManager {
 			throw new CustomException("调度器未启动");
 		}
 		JobDetail jobDetail = JobBuilder.newJob(ScheduledJob.class).withIdentity(task.getJob_name(), task.getJob_name())
-				.usingJobData("app_address", task.getApp_address()).build();
+				.usingJobData("callback_address", task.getCallback_address())
+				.usingJobData("callback_content", task.getCallback_content())
+				.build();
 		CronTrigger trigger = TriggerBuilder.newTrigger().withIdentity(task.getJob_name(), task.getJob_name())
 				.startNow().withSchedule(CronScheduleBuilder.cronSchedule(task.getCron_expression())).build();
 		scheduler.scheduleJob(jobDetail, trigger);
