@@ -3,6 +3,7 @@ package timer.service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -39,34 +40,36 @@ public class ScheduledJob implements Job {
         JobKey jobKey = jobExecutionContext.getJobDetail().getKey();
         JobDataMap dataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         
-        try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-        	if (CollectionUtils.isEmpty(dataMap) || StringUtils.isEmpty(dataMap.getString("callback_address"))) {
-        		logger.error("找不到回调地址,group={},name={}",jobKey.getGroup(),jobKey.getName());
+        CompletableFuture.runAsync(()->{
+        	try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+        		if (CollectionUtils.isEmpty(dataMap) || StringUtils.isEmpty(dataMap.getString("callback_address"))) {
+        			logger.error("找不到回调地址,group={},name={}",jobKey.getGroup(),jobKey.getName());
+        		}
+        		HttpPost httpPost = new HttpPost(dataMap.getString("callback_address"));
+        		String callbackContent = dataMap.getString("callback_content");
+        		if (!StringUtils.isEmpty(callbackContent)) {
+        			HttpEntity entity = new StringEntity(callbackContent, ContentType.APPLICATION_JSON);
+        			httpPost.setEntity(entity);
+        		}
+        		CloseableHttpResponse response = httpClient.execute(httpPost);
+        		HttpEntity entity = response.getEntity();
+        		String json = "";
+        		if (entity != null) {
+        			InputStream content = entity.getContent();
+        			InputStreamReader isr = new InputStreamReader(content);
+        			BufferedReader br = new BufferedReader(isr);
+        			String str = null;
+        			StringBuffer sb = new StringBuffer();
+        			if ((str = br.readLine()) != null) {
+        				sb.append(str);
+        			}
+        			json = GsonUtils.getInstance().toJson(sb.toString());
+        		}
+        		logger.info("调用成功,url={},entity={},group={},name={}",dataMap.getString("callback_address"),json,jobKey.getGroup(),jobKey.getName());
+        	} catch (Exception e) {
+        		logger.error("Http请求失败,url={},group={},name={}",
+        				dataMap.getString("callback_address"),jobKey.getGroup(),jobKey.getName(),e);
         	}
-        	HttpPost httpPost = new HttpPost(dataMap.getString("callback_address"));
-        	String callbackContent = dataMap.getString("callback_content");
-        	if (!StringUtils.isEmpty(callbackContent)) {
-        		HttpEntity entity = new StringEntity(callbackContent, ContentType.APPLICATION_JSON);
-        		httpPost.setEntity(entity);
-        	}
-			CloseableHttpResponse response = httpClient.execute(httpPost);
-			HttpEntity entity = response.getEntity();
-			String json = "";
-			if (entity != null) {
-				InputStream content = entity.getContent();
-				InputStreamReader isr = new InputStreamReader(content);
-				BufferedReader br = new BufferedReader(isr);
-				String str = null;
-				StringBuffer sb = new StringBuffer();
-				if ((str = br.readLine()) != null) {
-					sb.append(str);
-				}
-				json = GsonUtils.getInstance().toJson(sb.toString());
-			}
-			logger.info("调用成功,url={},entity={},group={},name={}",dataMap.getString("callback_address"),json,jobKey.getGroup(),jobKey.getName());
-		} catch (Exception e) {
-			logger.error("Http请求失败,url={},group={},name={}",
-					dataMap.getString("callback_address"),jobKey.getGroup(),jobKey.getName(),e);
-		}
+        });
     }
 }
