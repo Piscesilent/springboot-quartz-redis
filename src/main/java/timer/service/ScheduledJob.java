@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
 import timer.utils.GsonUtils;
 
 /**
- * 调度作业，用于执行真实业务
+ * ScheduledJob
  * @author SilenT
  *
  */
@@ -43,7 +43,7 @@ public class ScheduledJob implements Job {
         CompletableFuture.runAsync(()->{
         	try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
         		if (CollectionUtils.isEmpty(dataMap) || StringUtils.isEmpty(dataMap.getString("callback_address"))) {
-        			logger.error("找不到回调地址,group={},name={}",jobKey.getGroup(),jobKey.getName());
+        			logger.error("callback url error, group={}, name={}",jobKey.getGroup(),jobKey.getName());
         		}
         		HttpPost httpPost = new HttpPost(dataMap.getString("callback_address"));
         		String callbackContent = dataMap.getString("callback_content");
@@ -63,11 +63,12 @@ public class ScheduledJob implements Job {
         			if ((str = br.readLine()) != null) {
         				sb.append(str);
         			}
-        			json = GsonUtils.getInstance().toJson(sb.toString());
+        			json = GsonUtils.toJson(sb.toString());
         		}
-        		logger.info("调用成功,url={},entity={},group={},name={}",dataMap.getString("callback_address"),json,jobKey.getGroup(),jobKey.getName());
+        		logger.info("success, url={}, entity={}, group={}, name={}",
+        				dataMap.getString("callback_address"),json,jobKey.getGroup(),jobKey.getName());
         	} catch (Exception e) {
-        		logger.error("Http请求失败,url={},group={},name={}",
+        		logger.error("request failed, url={}, group={}, name={}",
         				dataMap.getString("callback_address"),jobKey.getGroup(),jobKey.getName(),e);
         	}
         });
