@@ -3,7 +3,7 @@ package timer.service;
 import java.io.Serializable;
 
 /**
- * 任务类
+ * Task
  * @author SilenT
  *
  */
@@ -12,22 +12,22 @@ public class Task implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * 任务名
+	 * job name
 	 */
 	private String job_name;
 	
 	/**
-	 * cron表达式
+	 * cron
 	 */
 	private String cron_expression;
 	
 	/**
-	 * 回调地址
+	 * callback url
 	 */
 	private String callback_address;
 	
 	/**
-	 * 回调内容
+	 * callback content
 	 */
 	private String callback_content;
 

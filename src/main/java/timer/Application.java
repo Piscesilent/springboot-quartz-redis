@@ -1,47 +1,36 @@
 package timer;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import org.apache.log4j.PropertyConfigurator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
+import timer.utils.PropUtils;
+
 /**
- * Application启动类
- * 
+ * Application bootstrap
  * @author SilenT
- *
  */
 @ComponentScan(basePackages = { "timer" })
 @EnableAutoConfiguration
 public class Application {
 
-	private static final Logger logger = LoggerFactory.getLogger(Application.class);
-
 	/**
-	 * spring boot 配置文件
+	 * spring boot properties
 	 */
 	private static final String SPRING_BOOT_PROP = "application.properties";
 
 	/**
-	 * quartz 配置文件
+	 * quartz properties
 	 */
 	private static final String QUARTZ_PROP = "quartz.properties";
 
 	/**
-	 * log4j 配置文件
+	 * log4j properties
 	 */
 	private static final String LOG4J_PROP = "log4j.properties";
 
 	/**
-	 * main函数
-	 * 
+	 * main method
 	 * @author SilenT
 	 * @param args
 	 * @throws Exception
@@ -49,53 +38,14 @@ public class Application {
 	public static void main(String[] args) throws Exception {
 		
 		/**
-		 * 初始化配置文件
+		 * init props
 		 */
-		initProperties(SPRING_BOOT_PROP, QUARTZ_PROP, LOG4J_PROP);
+		PropUtils.initProperties(SPRING_BOOT_PROP, QUARTZ_PROP, LOG4J_PROP);
 		
 		/**
-		 * 运行spring boot
+		 * running serive
 		 */
 		SpringApplication.run(Application.class, args);
 	}
-
-	/**
-	 * 读取配置文件
-	 * 
-	 * @author SilenT
-	 * @param fileName
-	 */
-	private static void initProperties(String... fileNames) {
-		if (null == fileNames || 0 == fileNames.length) {
-			return;
-		}
-		for (String fileName : fileNames) {
-			
-			String file = null;
-
-			file = Application.class.getClassLoader().getResource(fileName).getFile();
-			if (new File(file).exists()) {
-				PropertyConfigurator.configure(file);
-				logger.info("在IDE中运行，读取配置文件:{}", file);
-				continue;
-			}
-
-			file = System.getProperty("user.dir") + File.separator + fileName;
-			if (new File(file).exists()) {
-				PropertyConfigurator.configure(file);
-				logger.info("打包运行，读取配置文件:{}", file);
-				continue;
-			}
-			
-			InputStream in = Application.class.getClassLoader().getResourceAsStream(fileName);
-			Properties p = new Properties();
-			try {
-				p.load(in);
-				PropertyConfigurator.configure(p);
-				logger.info("读取外部配置文件失败，读取jar内置文件");
-			} catch (IOException e) {
-				System.exit(1);
-			}
-		}
-	}
+	
 }

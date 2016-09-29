@@ -3,7 +3,7 @@ package timer.utils;
 import java.io.Serializable;
 
 /**
- * 响应类
+ * Res
  * @author SilenT
  *
  */
@@ -11,11 +11,11 @@ public class NewResp implements Serializable {
 	
 	private static final long serialVersionUID = -1821975830305378599L;
 	
-	private String msg = "";//返回给客户端的消息
+	private String msg = "";//error msg
 	
-	private Object result = "";//数据
+	private Object result = "";//data
 	
-	private int code = 0;//错误码
+	private int code = 0;//error code
 	
 	private NewResp() {}
 	
